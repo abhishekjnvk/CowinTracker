@@ -1,7 +1,13 @@
 {
   "dependencies": {
     "axios": "^0.21.1",
+    "dotenv": "^9.0.2",
+    "express": "^4.17.1",
     "moment": "^2.29.1",
-    "request": "^2.88.2"
+    "mysql": "^2.18.1",
+    "node-simple-validator": "^1.1.2",
+    "nodemailer": "^6.6.0",
+    "request": "^2.88.2",
+    "util": "^0.12.3"
   }
 }

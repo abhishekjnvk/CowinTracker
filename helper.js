@@ -1,6 +1,7 @@
 var request = require("request");
+var pool = require("./config");
 
-module.exports = {
+var self = module.exports = {
   scan: async (pincode, date) => {
     var options = {
       method: "GET",
@@ -50,7 +51,7 @@ module.exports = {
         });
       });
     });
-    console.log("Available slots in your area")
+    console.log("Available slots in your area");
     console.log([
       {
         age: 18,
@@ -68,5 +69,9 @@ module.exports = {
       },
     ]);
   },
-  sendMail() {},                    //: Todo
+  sendMail() {}, //: Todo
+  getPinCodes: async () => {
+    var results = await pool.query("SELECT * from area");
+    return results;
+  },
 };
