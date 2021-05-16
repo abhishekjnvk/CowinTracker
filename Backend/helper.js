@@ -1,7 +1,7 @@
 var request = require("request");
-var pool = require("./config");
+var queryDB = require("./config");
 
-var self = module.exports = {
+var self = (module.exports = {
   scan: async (pincode, date) => {
     var options = {
       method: "GET",
@@ -71,7 +71,13 @@ var self = module.exports = {
   },
   sendMail() {}, //: Todo
   getPinCodes: async () => {
-    var results = await pool.query("SELECT * from area");
+    await queryDB(
+      `CREATE TABLE IF NOT EXISTS users (id integer PRIMARY KEY AUTOINCREMENT,pincode integer,email varchar,age integer)`
+    );
+    await queryDB(
+      `CREATE TABLE IF NOT EXISTS area (id integer PRIMARY KEY AUTOINCREMENT,pincode integer)`
+    );
+    var results = await queryDB("SELECT * from area");
     return results;
   },
-};
+});
