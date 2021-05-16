@@ -1,5 +1,5 @@
 {
-  "name": "Cowin",
+  "name": "cowin",
   "version": "1.0.0",
   "description": "Tracks cowin website for availability of vaccine on your pincode.",
   "main": "Backend/index.js",
@@ -15,9 +15,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.21.1",
     "dotenv": "^9.0.2",
     "express": "^4.17.1",
+    "memory-cache": "^0.2.0",
     "moment": "^2.29.1",
     "node-simple-validator": "^1.1.2",
     "nodemailer": "^6.6.0",

@@ -1,7 +1,12 @@
-var request = require("request");
-var queryDB = require("./config");
+const request = require("request");
+const queryDB = require("./config");
+const moment = require("moment");
+const cache = require('memory-cache');
 
-var self = (module.exports = {
+var center_list = [];
+var week_count = [];
+
+var helper = {
   scan: async (pincode, date) => {
     var options = {
       method: "GET",
@@ -69,6 +74,35 @@ var self = (module.exports = {
       },
     ]);
   },
+  search: async (pincode, id, start = false) => {
+    try {
+      if (cache.get("cache_" + pincode)) {
+        if (start) {
+          week_count[id] = 1;
+          center_list[id] = [];
+          var date = moment().format("DD-MM-YYYY"); //date format accepted by cowin
+        } else {
+          date = moment()
+            .add(6 * week_count[id], "days")
+            .format("DD-MM-YYYY");
+          week_count[id]++;
+        }
+        var log = await helper.scan(pincode, date);
+        if (log.centers.length) {
+          console.log("Scanning for" + date);
+          center_list[id].push(log.centers);
+          helper.search(pincode, id); //checking all available data
+        } else {
+          console.log("Done Scanning" + date);
+          if (center_list[id]) helper.analyse(center_list[id]); // Analyzing data for age group and dose
+        }
+      } else {
+        console.log("Cache Deleted");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  },
   sendMail() {}, //: Todo
   getPinCodes: async () => {
     await queryDB(
@@ -80,4 +114,6 @@ var self = (module.exports = {
     var results = await queryDB("SELECT * from area");
     return results;
   },
-});
+};
+
+module.exports = helper;
