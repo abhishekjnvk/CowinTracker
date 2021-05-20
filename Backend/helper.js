@@ -71,13 +71,13 @@ var helper = {
       let results = await helper.getEmailsOfPin(pincode, 18);
       helper.sendMail(results, pincode, final_available18);
     } else {
-      // console.log("No slot For 18 Years in " + pincode);
+      console.log("No slot For 18 Years in " + pincode);
     }
     if (final_available45 > 0) {
       let results = await helper.getEmailsOfPin(pincode, 45);
       helper.sendMail(results, pincode, final_available45);
     } else {
-      // console.log("No slot For 45 Years in " + pincode);
+      console.log("No slot For 45 Years in " + pincode);
     }
     // console.log([
     //   {
@@ -124,23 +124,17 @@ var helper = {
     }
   },
   async sendMail(mail, pincode, slot_available) {
-    if (!cache.get("mail_" + mail + "_" + pincode) && mail.length) {
-      console.log(mail);
-      cache.put("mail_" + mail + "_" + pincode, true, 3600 * 6 * 1000); //6 Hrs
-      transporter.sendMail({
-        from: '"Abhishek " <no-reply@abhishekjnvk.in>',
-        to: "no-reply@abhishekjnvk.in",
-        bcc: mail,
-        subject:
-          slot_available + " Vaccine Slot available in your area - " + pincode,
-        text: "Hello user Vaccine slot is available in your area please do register and help india to win covid war.",
-        html: `Hello user
+    transporter.sendMail({
+      from: '"Abhishek " <no-reply@abhishekjnvk.in>',
+      to: "no-reply@abhishekjnvk.in",
+      bcc: mail,
+      subject:
+        slot_available + " Vaccine Slot available in your area - " + pincode,
+      text: "Hello user Vaccine slot is available in your area please do register and help india to win covid war.",
+      html: `Hello user
       <br> ${slot_available} Vaccine slot is available in your area ${pincode} please do register and help india to win covid war.`,
-      });
-      // console.log("Mail Sent");
-    } else {
-      console.log("Already Sent");
-    }
+    });
+    console.log("Mail Sent to" + mail.toString());
   },
   getPinCodes: async () => {
     await queryDB(
