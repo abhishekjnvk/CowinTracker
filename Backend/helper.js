@@ -1,7 +1,18 @@
 const request = require("request");
 const queryDB = require("./config");
 const moment = require("moment");
-const cache = require('memory-cache');
+const cache = require("memory-cache");
+const nodemailer = require("nodemailer");
+const e = require("express");
+let transporter = nodemailer.createTransport({
+  host: "smtp.hostinger.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.SMTP_USER, // generated ethereal user
+    pass: process.env.SMTP_PASS, // generated ethereal password
+  },
+});
 
 var center_list = [];
 var week_count = [];
@@ -27,7 +38,7 @@ var helper = {
       });
     });
   },
-  analyse: async (centers) => {
+  analyse: async (centers, pincode) => {
     var final_available18 = 0;
     var final_available45 = 0;
     var final_available45 = 0;
@@ -57,22 +68,34 @@ var helper = {
       });
     });
     console.log("Available slots in your area");
-    console.log([
-      {
-        age: 18,
-        total: final_available18,
-        dose1: dose_1_18,
-        dose2: dose_2_18,
-        data_upto: upto_date,
-      },
-      {
-        age: 45,
-        total: final_available45,
-        dose1: dose_1_45,
-        dose2: dose_2_45,
-        data_upto: upto_date,
-      },
-    ]);
+    if (final_available18 > 0) {
+      let results = await helper.getEmailsOfPin(pincode, 18);
+      helper.sendMail(results, pincode, final_available18);
+    } else {
+      console.log("No slot For 18 Years in " + pincode);
+    }
+    if (final_available45 > 0) {
+      let results = await helper.getEmailsOfPin(pincode, 45);
+      helper.sendMail(results, pincode, final_available45);
+    } else {
+      console.log("No slot For 45 Years in " + pincode);
+    }
+    // console.log([
+    //   {
+    //     age: 18,
+    //     total: final_available18,
+    //     dose1: dose_1_18,
+    //     dose2: dose_2_18,
+    //     data_upto: upto_date,
+    //   },
+    //   {
+    //     age: 45,
+    //     total: final_available45,
+    //     dose1: dose_1_45,
+    //     dose2: dose_2_45,
+    //     data_upto: upto_date,
+    //   },
+    // ]);
   },
   search: async (pincode, id, start = false) => {
     try {
@@ -94,7 +117,7 @@ var helper = {
           helper.search(pincode, id); //checking all available data
         } else {
           console.log("Done Scanning" + date);
-          if (center_list[id]) helper.analyse(center_list[id]); // Analyzing data for age group and dose
+          if (center_list[id]) helper.analyse(center_list[id], pincode); // Analyzing data for age group and dose
         }
       } else {
         console.log("Cache Deleted");
@@ -103,7 +126,24 @@ var helper = {
       console.log(err);
     }
   },
-  sendMail() {}, //: Todo
+  async sendMail(mail, pincode, slot_available) {
+    if (!cache.get("mail_" + mail + "_" + pincode)) {
+      cache.put("mail_" + mail + "_" + pincode, true, 3600 * 6 * 1000); //6 Hrs
+      transporter.sendMail({
+        from: '"Abhishek " <no-reply@abhishekjnvk.in>',
+        to: "no-reply@abhishekjnvk.in",
+        bcc: mail,
+        subject:
+          slot_available + " Vaccine Slot available in your area - " + pincode,
+        text: "Hello user Vaccine slot is available in your area please do register and help india to win covid war.",
+        html: `Hello user
+      <br> ${slot_available} Vaccine slot is available in your area ${pincode} please do register and help india to win covid war.`,
+      });
+      // console.log("Mail Sent");
+    } else {
+      console.log("Already Sent");
+    }
+  },
   getPinCodes: async () => {
     await queryDB(
       `CREATE TABLE IF NOT EXISTS users (id integer PRIMARY KEY AUTOINCREMENT,pincode integer,email varchar,age integer)`
@@ -112,6 +152,32 @@ var helper = {
       `CREATE TABLE IF NOT EXISTS area (id integer PRIMARY KEY AUTOINCREMENT,pincode integer)`
     );
     var results = await queryDB("SELECT * from area");
+    return results;
+  },
+  getAllUsers: async () => {
+    await queryDB(
+      `CREATE TABLE IF NOT EXISTS users (id integer PRIMARY KEY AUTOINCREMENT,pincode integer,email varchar,age integer)`
+    );
+    await queryDB(
+      `CREATE TABLE IF NOT EXISTS area (id integer PRIMARY KEY AUTOINCREMENT,pincode integer)`
+    );
+    var results = await queryDB("SELECT * from users");
+    return results;
+  },
+  getEmailsOfPin: async (pincode, age) => {
+    await queryDB(
+      `CREATE TABLE IF NOT EXISTS users (id integer PRIMARY KEY AUTOINCREMENT,pincode integer,email varchar,age integer)`
+    );
+    await queryDB(
+      `CREATE TABLE IF NOT EXISTS area (id integer PRIMARY KEY AUTOINCREMENT,pincode integer)`
+    );
+    var results = await queryDB(
+      "SELECT email from users WHERE pincode=? AND age=?",
+      [pincode, age]
+    );
+    results = results.map((element) => {
+      return element.email;
+    });
     return results;
   },
 };

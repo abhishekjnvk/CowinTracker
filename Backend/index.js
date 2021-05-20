@@ -17,13 +17,16 @@ app.post("/remove", REMOVE_EMAIL);
 
 app.listen(PORT, async () => {
   let results = await helper.getPinCodes();
-  // results.map((elements) => {
-  //   cache.put("cache_"+elements.pincode,1)
-  //   helper.search(elements.pincode, elements.id, true);
-  //   setInterval(() => {
-  //     //searching after each 30 minutes
-  //     helper.search(elements.pincode, elements.id, true);
-  //   }, 1800 * 1000);
-  // });
+  results.map((elements) => {
+    cache.put("cache_" + elements.pincode, 1);
+    helper.search(elements.pincode, elements.id, true);
+    setInterval(() => {
+      //searching after each 30 minutes
+      helper.search(elements.pincode, elements.id, true);
+    }, 1800 * 1000);
+  });
+  console.log({
+    SMTP: { pass: process.env.SMTP_PASS, user: process.env.SMTP_PASS },
+  });
   console.log("SERVER STARTED AT PORT " + PORT);
 });

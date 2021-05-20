@@ -1,20 +1,20 @@
 const queryDB = require("./config");
-const { isEmail, isNumber } = require("node-simple-validator");
+const { isEmail, isString, isNumberString } = require("node-simple-validator");
 const helper = require("./helper");
-const cache = require('memory-cache');
+const cache = require("memory-cache");
 
 module.exports.ADD_EMAIL = async (req, res) => {
   try {
     const { pincode, email, age } = req.body;
     if (pincode && email && age) {
       if (isEmail(email)) {
-        if (isNumber(parseInt(pincode))) {
+        if (isNumberString(pincode) && pincode.length == 6) {
           var [result] = await queryDB(
             "Select * FROM `users` WHERE email=? AND pincode=? AND age=?",
             [email, pincode, age]
           );
           if (!result) {
-            var ab = await queryDB(
+            await queryDB(
               "INSERT INTO `users`(`email`, `pincode`,`age`) VALUES (?,?,?)",
               [email, pincode, age]
             );
@@ -38,7 +38,7 @@ module.exports.ADD_EMAIL = async (req, res) => {
                 helper.search(pincode, id, true);
               }, 1800 * 1000);
             }
-            res.json({ body: "Email Added", status: 1, ab });
+            res.json({ body: "Email Added", status: 1 });
           } else {
             res.json({ status: 0, message: "Already Added" });
           }
@@ -63,7 +63,7 @@ module.exports.REMOVE_EMAIL = async (req, res) => {
     const { pincode, email } = req.body;
     if (pincode && email) {
       if (isEmail(email)) {
-        if (isNumber(parseInt(pincode))) {
+        if (isNumberString(pincode)) {
           var [result] = await queryDB(
             "Select * FROM `users` WHERE email=? AND pincode=?",
             [email, pincode]
@@ -83,7 +83,7 @@ module.exports.REMOVE_EMAIL = async (req, res) => {
               cache.del("cache_" + pincode);
             }
           } else {
-            res.json({ status: 0, message: "Email Doesn't Exist" });
+            res.json({ status: 0, message: "Invalid Details Provided" });
           }
         } else {
           res.json({ status: 0, message: "Invalid Pincode" });
