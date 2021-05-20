@@ -25,8 +25,5 @@ app.listen(PORT, async () => {
       helper.search(elements.pincode, elements.id, true);
     }, 1800 * 1000);
   });
-  console.log({
-    SMTP: { pass: process.env.SMTP_PASS, user: process.env.SMTP_PASS },
-  });
   console.log("SERVER STARTED AT PORT " + PORT);
 });

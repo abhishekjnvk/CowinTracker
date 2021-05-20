@@ -3,7 +3,7 @@ const queryDB = require("./config");
 const moment = require("moment");
 const cache = require("memory-cache");
 const nodemailer = require("nodemailer");
-const e = require("express");
+
 let transporter = nodemailer.createTransport({
   host: "smtp.hostinger.com",
   port: 465,
@@ -67,18 +67,17 @@ var helper = {
         });
       });
     });
-    console.log("Available slots in your area");
     if (final_available18 > 0) {
       let results = await helper.getEmailsOfPin(pincode, 18);
       helper.sendMail(results, pincode, final_available18);
     } else {
-      console.log("No slot For 18 Years in " + pincode);
+      // console.log("No slot For 18 Years in " + pincode);
     }
     if (final_available45 > 0) {
       let results = await helper.getEmailsOfPin(pincode, 45);
       helper.sendMail(results, pincode, final_available45);
     } else {
-      console.log("No slot For 45 Years in " + pincode);
+      // console.log("No slot For 45 Years in " + pincode);
     }
     // console.log([
     //   {
@@ -112,15 +111,13 @@ var helper = {
         }
         var log = await helper.scan(pincode, date);
         if (log.centers.length) {
-          console.log("Scanning for" + date);
           center_list[id].push(log.centers);
           helper.search(pincode, id); //checking all available data
         } else {
-          console.log("Done Scanning" + date);
           if (center_list[id]) helper.analyse(center_list[id], pincode); // Analyzing data for age group and dose
         }
       } else {
-        console.log("Cache Deleted");
+        // console.log("no user for this pincode");
       }
     } catch (err) {
       console.log(err);

@@ -19,12 +19,12 @@ $(document).ready(function () {
       };
 
       $.confirm({
-        title: "Remove Email From List",
+        title: "Adding email for alert",
         content: function () {
           var self = this;
           self.setContent("Please wait");
           return $.ajax(settings).done(function (response) {
-            console.log(response);
+            // console.log(response);
             if (response.status) {
               self.setContent("Email Added");
               $("#email").val("");
@@ -66,7 +66,7 @@ $(document).ready(function () {
           var self = this;
           self.setContent("Please wait");
           return $.ajax(settings).done(function (response) {
-            console.log(response);
+            // console.log(response);
             if (response.status) {
               self.setContent("Email Removed From list");
               $("#email_remove").val("");
