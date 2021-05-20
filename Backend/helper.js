@@ -124,7 +124,8 @@ var helper = {
     }
   },
   async sendMail(mail, pincode, slot_available) {
-    if (!cache.get("mail_" + mail + "_" + pincode)) {
+    if (!cache.get("mail_" + mail + "_" + pincode) && mail.length) {
+      console.log(mail);
       cache.put("mail_" + mail + "_" + pincode, true, 3600 * 6 * 1000); //6 Hrs
       transporter.sendMail({
         from: '"Abhishek " <no-reply@abhishekjnvk.in>',
